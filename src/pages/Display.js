@@ -11,8 +11,7 @@ const Display = () => {
     const [notifiedItems, setNotifiedItems] = useState([]);
     const firebase = useFirebase();
 
-    const APP_ID = "38eda028";
-    const APP_KEY = "f0ce808ed79824c58d8977f482c9b51e";
+    const SPOONACULAR_API_KEY = "061c04ecbc374d28a55c0aba22c3d6af"; // Replace with your API key
 
     useEffect(() => {
         const fetchAllItems = async () => {
@@ -31,8 +30,6 @@ const Display = () => {
 
         fetchAllItems();
     }, [firebase]);
-
-    // start
 
     useEffect(() => {
         const checkExpiryDates = async () => {
@@ -63,7 +60,6 @@ const Display = () => {
 
                         console.log(`Notification sent for item: ${pname}`);
 
-                        // Update notified items state
                         setNotifiedItems([...notifiedItems, id]);
                     }
                 } else {
@@ -75,10 +71,7 @@ const Display = () => {
         if (items.length > 0) {
             checkExpiryDates();
         }
-    }, [items, notifiedItems]); // Include notifiedItems in dependency array
-
-
-    //end
+    }, [items, notifiedItems]);
 
     const fetchQueriedItems = async () => {
         try {
@@ -100,32 +93,39 @@ const Display = () => {
             const user = firebase.user;
             if (user) {
                 const queriedCategories = await firebase.listCategories();
-                console.log(queriedCategories);
+                console.log("Fetched Categories:", queriedCategories);
                 setQueriedCategory(queriedCategories);
-
+    
                 if (queriedCategories.length > 0) {
                     let recipesArray = [];
                     for (let category of queriedCategories) {
-                        const response = await fetch(`https://api.edamam.com/search?q=${category}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+                        console.log(`Fetching recipes for category: ${category}`);
+    
+                        // Query Spoonacular for recipes based on the category
+                        const response = await fetch(
+                            `https://api.spoonacular.com/recipes/complexSearch?query=${category}&cuisine=Indian&apiKey=061c04ecbc374d28a55c0aba22c3d6af&number=10`
+                        );
                         const data = await response.json();
-                        recipesArray = [...recipesArray, ...data.hits];
+    
+                        if (data.results && data.results.length > 0) {
+                            recipesArray = [...recipesArray, ...data.results];
+                        } else {
+                            console.log(`No recipes found for category: ${category}`);
+                        }
                     }
                     setRecipes(recipesArray);
                 } else {
-                    console.log('No categories to fetch recipes for.');
+                    console.log('No categories found to fetch recipes.');
                     setRecipes([]);
                 }
-
-                const queriedItems = await firebase.listOnExpiry();
-                console.log(queriedItems);
-                setQueriedItems(queriedItems);
             } else {
                 console.log("User is not authenticated");
             }
         } catch (error) {
-            console.error('Error fetching items approaching expiry or categories:', error);
+            console.error('Error fetching category-based recipes:', error);
         }
     };
+    
 
     const resetItems = () => {
         setQueriedItems([]);
@@ -162,10 +162,9 @@ const Display = () => {
                 <div className='flex flex-wrap space-x-8 space-y-5 justify-center'>
                     {recipes.length > 0 ? (
                         recipes.map(recipe => (
-                            <Recipe key={recipe.recipe.label} title={recipe.recipe.label} calories={recipe.recipe.calories} image={recipe.recipe.image} />
+                            <Recipe key={recipe.id} title={recipe.title} image={recipe.image} />
                         ))
                     ) : (
-
                         <p className="text-center mt-4 text-2xl">Click "Suggest" to fetch recipes.</p>
                     )}
                 </div>
