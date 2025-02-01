@@ -80,7 +80,6 @@ const Home = () => {
           <a href="#home" className="active">Home</a>
           <a href="#about">About</a>
           <a href="#education">Sevices</a>
-          <a href="#contact">Feedback</a>
           {firebase.isLoggedIn ? (
             <Link className="text-green-500 pl-6 hover:bg-white hover:text-red-600" onClick={firebase.handleLogout}>Logout </Link>
           ) : (
