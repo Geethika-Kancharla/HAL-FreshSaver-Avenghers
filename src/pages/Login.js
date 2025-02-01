@@ -11,9 +11,14 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const result = await firebase.signinUserWithEmailAndPassword(email, password);
-        console.log("Successful", result);
-        console.log("Logged In");
+        try {
+            const result = await firebase.signinUserWithEmailAndPassword(email, password);
+            // User will be automatically stored in localStorage through Firebase context
+            console.log("Successful", result);
+            console.log("Logged In");
+        } catch (error) {
+            console.error("Login error:", error);
+        }
     }
 
     const handlePasswordReset = () => {
@@ -25,7 +30,9 @@ const Login = () => {
     }
 
     useEffect(() => {
-        if (firebase.isLoggedIn) {
+        // Check localStorage for existing user
+        const savedUser = localStorage.getItem('user');
+        if (savedUser || firebase.isLoggedIn) {
             navigate("/");
         }
     }, [firebase, navigate])

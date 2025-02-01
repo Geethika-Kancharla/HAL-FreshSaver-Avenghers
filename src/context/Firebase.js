@@ -47,7 +47,11 @@ export const useFirebase = () => {
 export const FirebaseProvider = (props) => {
 
 
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        // Initialize user state from localStorage
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
 
     const addUser = (email, password, name, phno) => {
         createUserWithEmailAndPassword(firebaseAuth, email, password)
@@ -76,10 +80,20 @@ export const FirebaseProvider = (props) => {
 
     useEffect(() => {
         onAuthStateChanged(firebaseAuth, user => {
-            if (user)
-                setUser(user);
-            else
+            if (user) {
+                // Store user in localStorage when logged in
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    // Add any other user properties you need
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData);
+            } else {
+                // Remove user from localStorage when logged out
+                localStorage.removeItem('user');
                 setUser(null);
+            }
         })
     }, [])
 
@@ -242,6 +256,9 @@ export const FirebaseProvider = (props) => {
     const handleLogout = async () => {
         try {
             await signOut(firebaseAuth);
+            // Clear localStorage on logout
+            localStorage.removeItem('user');
+            setUser(null);
         } catch (error) {
             console.error('Error occurred during logout:', error);
         }

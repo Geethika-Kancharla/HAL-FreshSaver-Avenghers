@@ -9,21 +9,22 @@ import Details from './pages/Details';
 import Display from './pages/Display';
 
 function App() {
-
     const firebase = useFirebase();
 
-    const currentUser = firebase.isLoggedIn;
+    const isAuthenticated = () => {
+        return firebase.isLoggedIn || localStorage.getItem('user') !== null;
+    }
 
     const RequireAuth = ({ children }) => {
-        return currentUser ? children : <Navigate to="/login"></Navigate>;
+        return isAuthenticated() ? children : <Navigate to="/login" />;
     }
 
     return (
         <Routes>
             <Route index element={<Home />} />
-            <Route index path="/register" element={<Register />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/details" element={<RequireAuth><Details /></RequireAuth>} />
-            <Route index path="/display" element={<RequireAuth><Display /></RequireAuth>} />
+            <Route path="/display" element={<RequireAuth><Display /></RequireAuth>} />
             <Route path="/login" element={<Login />} />
         </Routes>
     );
