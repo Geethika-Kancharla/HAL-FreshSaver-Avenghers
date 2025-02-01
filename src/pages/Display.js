@@ -31,7 +31,7 @@ const Display = () => {
         fetchAllItems();
     }, [firebase]);
 
-    const SPOONACULAR_API_KEY = "061c04ecbc374d28a55c0aba22c3d6af";
+    const SPOONACULAR_API_KEY = "8f19f70508cb4981acafc30de3ded9d7";
 
     useEffect(() => {
         const checkExpiryDates = async () => {
