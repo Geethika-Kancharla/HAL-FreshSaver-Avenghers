@@ -23,7 +23,7 @@ const Register = () => {
     useEffect(() => {
         if (firebase.isLoggedIn) {
             console.log(firebase);
-            navigate("/home");
+            navigate("/");
         }
     }, [firebase, navigate])
 
