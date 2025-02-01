@@ -12,7 +12,7 @@ import {
 } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs, doc, deleteDoc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getMessaging } from "firebase/messaging";
+
 import sendExpiryEmail from "../components/emailService"
 
 const FirebaseContext = createContext(null);
@@ -32,7 +32,7 @@ export const firebaseAuth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 export const firestore = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
-export const messaging = getMessaging(firebaseApp);
+
 
 export const useFirebase = () => {
     const firebase = useContext(FirebaseContext);
