@@ -73,6 +73,7 @@ const Display = () => {
             checkExpiryDates();
         }
     }, [items, notifiedItems]);
+    }, [items, notifiedItems]);
 
     const fetchQueriedItems = async () => {
         try {
@@ -95,11 +96,19 @@ const Display = () => {
             if (user) {
                 const queriedCategories = await firebase.listCategories();
                 console.log("Fetched Categories:", queriedCategories);
+                console.log("Fetched Categories:", queriedCategories);
                 setQueriedCategory(queriedCategories);
+    
     
                 if (queriedCategories.length > 0) {
                     let recipesArray = [];
                     for (let category of queriedCategories) {
+                        console.log(`Fetching recipes for category: ${category}`);
+    
+                        // Query Spoonacular for recipes based on the category
+                        const response = await fetch(
+                            `https://api.spoonacular.com/recipes/complexSearch?query=${category}&cuisine=Indian&apiKey=061c04ecbc374d28a55c0aba22c3d6af&number=10`
+                        );
                         console.log(`Fetching recipes for category: ${category}`);
     
                         // Query Spoonacular for recipes based on the category
@@ -113,9 +122,16 @@ const Display = () => {
                         } else {
                             console.log(`No recipes found for category: ${category}`);
                         }
+    
+                        if (data.results && data.results.length > 0) {
+                            recipesArray = [...recipesArray, ...data.results];
+                        } else {
+                            console.log(`No recipes found for category: ${category}`);
+                        }
                     }
                     setRecipes(recipesArray);
                 } else {
+                    console.log('No categories found to fetch recipes.');
                     console.log('No categories found to fetch recipes.');
                     setRecipes([]);
                 }
@@ -124,8 +140,10 @@ const Display = () => {
             }
         } catch (error) {
             console.error('Error fetching category-based recipes:', error);
+            console.error('Error fetching category-based recipes:', error);
         }
     };
+    
 
     const resetItems = () => {
         setQueriedItems([]);
