@@ -112,7 +112,7 @@ const Home = () => {
       </section >
 
       < section className="about" id="about" >
-        <h2 className="heading">About <span>Me</span><span className="animate scroll" style={{ '--i': 1 }}></span></h2>
+        <h2 className="heading">About <span className="animate scroll" style={{ '--i': 1 }}></span></h2>
         <div className="about-img">
           <img src="/assets/about.jpg" alt="" />
           <span className="circle-spin"></span>
