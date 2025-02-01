@@ -103,7 +103,6 @@ const Display = () => {
                     for (let category of queriedCategories) {
                         console.log(`Fetching recipes for category: ${category}`);
 
-                        // Query Spoonacular for recipes based on the category
                         const response = await fetch(
                             `https://api.spoonacular.com/recipes/complexSearch?query=${category}&cuisine=Indian&apiKey=${SPOONACULAR_API_KEY}&number=10`
                         );
