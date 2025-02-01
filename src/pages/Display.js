@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../context/Firebase';
 import Table from '../components/Table';
 import Recipe from '../components/Recipe';
+import DisplayNavbar from '../components/DisplayNavbar';
 import { AlertCircle, ChefHat, Filter, RefreshCw } from 'lucide-react';
 
 const Display = () => {
@@ -141,72 +142,76 @@ const Display = () => {
     
    
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-               
-                <div className="bg-white rounded-xl shadow-lg p-4 flex flex-wrap gap-4 justify-center">
-                    <button 
-                        onClick={fetchQueriedItems}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
-                    >
-                        <Filter size={20} />
-                        Expiring Soon
-                    </button>
-                    <button 
-                        onClick={resetItems}
-                        className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
-                    >
-                        <RefreshCw size={20} />
-                        Reset View
-                    </button>
-                    <button 
-                        onClick={fetchCategories}
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
-                    >
-                        <ChefHat size={20} />
-                        Find Recipes
-                    </button>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+            <DisplayNavbar />
+            
+            <div className="pt-12 px-4 md:px-8 pb-8"> 
+                <div className="max-w-7xl mx-auto space-y-8">
+         
+                    <div className="bg-white rounded-xl shadow-lg p-4 flex flex-wrap gap-4 justify-center">
+                        <button 
+                            onClick={fetchQueriedItems}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                        >
+                            <Filter size={20} />
+                            Expiring Soon
+                        </button>
+                        <button 
+                            onClick={resetItems}
+                            className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                        >
+                            <RefreshCw size={20} />
+                            Reset View
+                        </button>
+                        <button 
+                            onClick={fetchCategories}
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                        >
+                            <ChefHat size={20} />
+                            Find Recipes
+                        </button>
+                    </div>
 
-                {/* Inventory Section */}
-                <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                    <div className="flex items-center gap-3 border-b pb-4">
-                        <AlertCircle className="text-blue-600" size={24} />
-                        <h2 className="text-2xl font-semibold text-gray-800">Current Inventory</h2>
+                    {/* Inventory Section */}
+                    <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                        <div className="flex items-center gap-3 border-b pb-4">
+                            <AlertCircle className="text-blue-600" size={24} />
+                            <h2 className="text-2xl font-semibold text-gray-800">Current Inventory</h2>
+                        </div>
+                        <div className="space-y-4">
+                            {queriedItems.length > 0
+                                ? queriedItems.map((queryItem, index) => (
+                                    <Table key={index} onItemDelete={handleItemDelete} {...queryItem} />
+                                ))
+                                : items.map((item, index) => (
+                                    <Table key={index} onItemDelete={handleItemDelete} {...item.data()} />
+                                ))}
+                        </div>
                     </div>
-                    <div className="space-y-4">
-                        {queriedItems.length > 0
-                            ? queriedItems.map((queryItem, index) => (
-                                <Table key={index} onItemDelete={handleItemDelete} {...queryItem} />
-                            ))
-                            : items.map((item, index) => (
-                                <Table key={index} onItemDelete={handleItemDelete} {...item.data()} />
-                            ))}
-                    </div>
-                </div>
 
-                {/* Recipe Section */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex items-center gap-3 border-b pb-4 mb-6">
-                        <ChefHat className="text-green-600" size={24} />
-                        <h2 className="text-2xl font-semibold text-gray-800">Recommended Recipes</h2>
+                    {/* Recipe Section */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <div className="flex items-center gap-3 border-b pb-4 mb-6">
+                            <ChefHat className="text-green-600" size={24} />
+                            <h2 className="text-2xl font-semibold text-gray-800">Recommended Recipes</h2>
+                        </div>
+                        {recipes.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {recipes.map(recipe => (
+                                    <Recipe 
+                                        key={recipe.id}
+                                        title={recipe.title}
+                                        image={recipe.image}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-gray-600">
+                                <ChefHat size={48} className="mx-auto mb-4 text-gray-400" />
+                                <p>Click "Find Recipes" to get personalized recommendations based on your inventory</p>
+                            </div>
+                        )}
                     </div>
-                    {recipes.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {recipes.map(recipe => (
-                                <Recipe 
-                                    key={recipe.id}
-                                    title={recipe.title}
-                                    image={recipe.image}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12 text-gray-600">
-                            <ChefHat size={48} className="mx-auto mb-4 text-gray-400" />
-                            <p>Click "Find Recipes" to get personalized recommendations based on your inventory</p>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
