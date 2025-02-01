@@ -9,14 +9,13 @@ import {
     signInWithPopup,
     signOut,
     sendPasswordResetEmail
-} from 'firebase/auth'
+} from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs, doc, deleteDoc, setDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getMessaging } from "firebase/messaging";
-
+import sendExpiryEmail from "../components/emailService"
 
 const FirebaseContext = createContext(null);
-
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -35,7 +34,6 @@ export const firestore = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
 export const messaging = getMessaging(firebaseApp);
 
-
 export const useFirebase = () => {
     const firebase = useContext(FirebaseContext);
     if (!firebase) {
@@ -45,8 +43,6 @@ export const useFirebase = () => {
 }
 
 export const FirebaseProvider = (props) => {
-
-
     const [user, setUser] = useState(() => {
         // Initialize user state from localStorage
         const savedUser = localStorage.getItem('user');
@@ -97,9 +93,7 @@ export const FirebaseProvider = (props) => {
         })
     }, [])
 
-
     const handleCreateNewListing = async (pname, quantity, brand, coverPic, expiry, category) => {
-
         const fileName = coverPic.name || `image-${Date.now()}.jpg`;
         const imageRef = ref(storage, `uploads/images/${Date.now()}-${fileName}`);
         try {
@@ -112,32 +106,34 @@ export const FirebaseProvider = (props) => {
                 quantity,
                 imageURL: uploadResult.ref.fullPath,
                 userId: user.uid,
-                userEmail: user.email,
+                userEmail: user.email, // This is the registered user's email
                 id: randomId,
                 expiry,
                 category
             };
             const messageDocRef = doc(firestore, 'items', randomId);
             await setDoc(messageDocRef, messageDetail);
-            console.log('User document created with UID:', randomId);
+    
+            // Send expiry email to the registered user
+            sendExpiryEmail(user.email, pname, expiry); // Pass user.email here
+    
+            console.log('Product added with ID:', randomId);
             return randomId;
         } catch (error) {
-            console.error('Error creating user document:', error);
+            console.error('Error adding product:', error);
             throw error;
         }
     };
 
-
     const getImageURL = (path) => {
         return getDownloadURL(ref(storage, path));
-    }
+    };
 
     const sendPReset = (email) => {
         sendPasswordResetEmail(firebaseAuth, email);
-    }
+    };
 
     const listAllItems = async () => {
-
         if (user) {
             try {
                 const qr = query(
@@ -169,7 +165,7 @@ export const FirebaseProvider = (props) => {
 
             const userId = user.uid;
             const twoDaysFromNow = new Date();
-            twoDaysFromNow.setDate(twoDaysFromNow.getMonth() + 1);
+            twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
 
             const formattedTwoDaysFromNow = `${twoDaysFromNow.getFullYear()}-${(twoDaysFromNow.getMonth() + 1).toString().padStart(2, '0')}-${twoDaysFromNow.getDate().toString().padStart(2, '0')}`;
 
@@ -183,11 +179,14 @@ export const FirebaseProvider = (props) => {
 
             const approachingExpiryItems = [];
             querySnap.forEach((doc) => {
-                approachingExpiryItems.push(doc.data());
+                const itemData = doc.data();
+                approachingExpiryItems.push(itemData);
+
+                // Send expiry email
+                sendExpiryEmail(user.email, itemData.pname, itemData.expiry);
             });
 
             console.log('Items approaching expiry within two days:', approachingExpiryItems);
-
             return approachingExpiryItems;
         } catch (error) {
             console.error('Error querying items approaching expiry within two days:', error);
@@ -196,7 +195,6 @@ export const FirebaseProvider = (props) => {
     };
 
     const listCategories = async () => {
-
         try {
             if (!user) {
                 console.log("User is not authenticated");
@@ -238,27 +236,23 @@ export const FirebaseProvider = (props) => {
         }
     };
 
-
     const deleteItem = async (id) => {
         await deleteDoc(doc(firestore, "items", id));
-    }
+    };
 
     const signinUserWithEmailAndPassword = (email, password) => {
         signInWithEmailAndPassword(firebaseAuth, email, password);
-    }
+    };
 
     const signinWithGoogle = () => {
         signInWithPopup(firebaseAuth, googleProvider);
-    }
+    };
 
     const isLoggedIn = user ? true : false;
 
     const handleLogout = async () => {
         try {
             await signOut(firebaseAuth);
-            // Clear localStorage on logout
-            localStorage.removeItem('user');
-            setUser(null);
         } catch (error) {
             console.error('Error occurred during logout:', error);
         }
@@ -278,10 +272,10 @@ export const FirebaseProvider = (props) => {
             user,
             listCategories,
             handleLogout,
-            sendPReset
-        }
-        }>
+            sendPReset,
+            sendExpiryEmail // Add this line
+        }}>
             {props.children}
         </FirebaseContext.Provider>
-    )
-}
+    );
+};
