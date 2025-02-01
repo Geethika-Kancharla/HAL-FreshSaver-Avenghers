@@ -76,18 +76,18 @@ const Home = () => {
       "--main-color": "#00f020"
     }}>
       <header className={`header ${menuActive ? 'active' : ''}`}>
-        <a href="#" className="logo">FS<span className="animate" style={{ '--i': 1 }}></span></a>
+        <a href="#" className="logo"><img src="logo.png" width="80" height="80"></img><span className="animate" style={{ '--i': 1 }}></span></a>
         <div className="bx bx-menu" id="menu-icon" onClick={toggleMenu}>
           <span className="animate" style={{ '--i': 2 }}></span>
         </div>
-        <nav className={`navbar ${menuActive ? 'active' : ''}`}>
-          <a href="#home" className="active">Home</a>
-          <a href="#about">About</a>
-          <a href="#education">Services</a>
+        <nav className={`navbar ${menuActive ? 'active' : ''}`} style={{ display: "flex", gap: "20px" }}>
+          <a href="#home" className="active" style={{ fontSize: "20px", marginRight: "40px" }}>Home</a>
+          <a href="#about" style={{fontSize: "20px", marginRight: "40px" }}>About</a>
+          <a href="#education" style={{fontSize: "20px", marginRight: "40px" }}>Services</a>
           {firebase.isLoggedIn ? (
             <Link className="nav-link" onClick={firebase.handleLogout}>Logout</Link>
           ) : (
-            <Link className="nav-link" to="/login">Login</Link>
+            <Link className="nav-link" to="/login" style={{ fontSize: "20px", marginRight: "40px" }}>Login</Link>
           )}
           <span className="active-nav"></span>
           <span className="animate" style={{ '--i': 2 }}></span>
