@@ -6,6 +6,7 @@ import { useFirebase } from '../context/Firebase';
 
 const Home = () => {
   const [menuActive, setMenuActive] = useState(false);
+  const firebase = useFirebase();
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);
@@ -16,8 +17,6 @@ const Home = () => {
   const handleClick = () => {
     setMenu(!isMenu);
   }
-
-  const firebase = useFirebase();
 
   useEffect(() => {
     console.log(firebase.isLoggedIn)
@@ -70,7 +69,12 @@ const Home = () => {
   }, []);
 
   return (
-    <div className='h-screen'>
+    <div className="home-page" style={{
+      "--bg-color": "#f6f8fa",
+      "--second-bg-color": "#f7fafc",
+      "--text-color": "#0a0000",
+      "--main-color": "#00f020"
+    }}>
       <header className={`header ${menuActive ? 'active' : ''}`}>
         <a href="#" className="logo">FS<span className="animate" style={{ '--i': 1 }}></span></a>
         <div className="bx bx-menu" id="menu-icon" onClick={toggleMenu}>
@@ -79,11 +83,11 @@ const Home = () => {
         <nav className={`navbar ${menuActive ? 'active' : ''}`}>
           <a href="#home" className="active">Home</a>
           <a href="#about">About</a>
-          <a href="#education">Sevices</a>
+          <a href="#education">Services</a>
           {firebase.isLoggedIn ? (
-            <Link className="text-green-500 pl-6 hover:bg-white hover:text-red-600" onClick={firebase.handleLogout}>Logout </Link>
+            <Link className="nav-link" onClick={firebase.handleLogout}>Logout</Link>
           ) : (
-            <Link className="text-green-500 pl-6 hover:bg-white hover:text-red-600 border border-green-600" to="/login">Login</Link>
+            <Link className="nav-link" to="/login">Login</Link>
           )}
           <span className="active-nav"></span>
           <span className="animate" style={{ '--i': 2 }}></span>
@@ -186,9 +190,12 @@ const Home = () => {
       </section >
 
 
-
-      <div className="bg-gray-900 p-12 text-3xl">
-        <p className='text-white text-center'>Made with <span className='text-red-700'>❤</span> FreshSaver</p>
+     
+      <div className="bg-gray-900 h-24 text-3xl relative overflow-hidden hover:bg-gray-800 transition-all duration-300 flex items-center justify-center flex-col">
+        <p className='text-white text-center text-lg tracking-wider font-light'>
+            Made with <span className='text-red-600 animate-pulse hover:text-red-400 transition-colors duration-300'>❤</span> by FreshSaver
+        </p>
+        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
       </div>
 
 

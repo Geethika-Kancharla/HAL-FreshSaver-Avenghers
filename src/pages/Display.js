@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../context/Firebase';
 import Table from '../components/Table';
 import Recipe from '../components/Recipe';
+import { AlertCircle, ChefHat, Filter, RefreshCw } from 'lucide-react';
 
 const Display = () => {
     const [items, setItems] = useState([]);
@@ -10,9 +11,6 @@ const Display = () => {
     const [recipes, setRecipes] = useState([]);
     const [notifiedItems, setNotifiedItems] = useState([]);
     const firebase = useFirebase();
-
-    const APP_ID = "38eda028";
-    const APP_KEY = "f0ce808ed79824c58d8977f482c9b51e";
 
     useEffect(() => {
         const fetchAllItems = async () => {
@@ -32,7 +30,7 @@ const Display = () => {
         fetchAllItems();
     }, [firebase]);
 
-    // start
+    const SPOONACULAR_API_KEY = "061c04ecbc374d28a55c0aba22c3d6af";
 
     useEffect(() => {
         const checkExpiryDates = async () => {
@@ -63,7 +61,6 @@ const Display = () => {
 
                         console.log(`Notification sent for item: ${pname}`);
 
-                        // Update notified items state
                         setNotifiedItems([...notifiedItems, id]);
                     }
                 } else {
@@ -75,10 +72,7 @@ const Display = () => {
         if (items.length > 0) {
             checkExpiryDates();
         }
-    }, [items, notifiedItems]); // Include notifiedItems in dependency array
-
-
-    //end
+    }, [items, notifiedItems]);
 
     const fetchQueriedItems = async () => {
         try {
@@ -100,30 +94,36 @@ const Display = () => {
             const user = firebase.user;
             if (user) {
                 const queriedCategories = await firebase.listCategories();
-                console.log(queriedCategories);
+                console.log("Fetched Categories:", queriedCategories);
                 setQueriedCategory(queriedCategories);
-
+    
                 if (queriedCategories.length > 0) {
                     let recipesArray = [];
                     for (let category of queriedCategories) {
-                        const response = await fetch(`https://api.edamam.com/search?q=${category}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+                        console.log(`Fetching recipes for category: ${category}`);
+    
+                        // Query Spoonacular for recipes based on the category
+                        const response = await fetch(
+                            `https://api.spoonacular.com/recipes/complexSearch?query=${category}&cuisine=Indian&apiKey=061c04ecbc374d28a55c0aba22c3d6af&number=10`
+                        );
                         const data = await response.json();
-                        recipesArray = [...recipesArray, ...data.hits];
+    
+                        if (data.results && data.results.length > 0) {
+                            recipesArray = [...recipesArray, ...data.results];
+                        } else {
+                            console.log(`No recipes found for category: ${category}`);
+                        }
                     }
                     setRecipes(recipesArray);
                 } else {
-                    console.log('No categories to fetch recipes for.');
+                    console.log('No categories found to fetch recipes.');
                     setRecipes([]);
                 }
-
-                const queriedItems = await firebase.listOnExpiry();
-                console.log(queriedItems);
-                setQueriedItems(queriedItems);
             } else {
                 console.log("User is not authenticated");
             }
         } catch (error) {
-            console.error('Error fetching items approaching expiry or categories:', error);
+            console.error('Error fetching category-based recipes:', error);
         }
     };
 
@@ -136,37 +136,74 @@ const Display = () => {
     const handleItemDelete = (deletedItemId) => {
         setItems(items.filter(item => item.id !== deletedItemId));
     };
-
+    
+   
     return (
-        <div className='h-screen w-screen bg-white'>
-            <div className='shadow-md'>
-                <div className='mt-36'>
-                    {queriedItems.length > 0 ? (
-                        queriedItems.map((queryItem, index) => (
-                            <Table key={index} onItemDelete={handleItemDelete} {...queryItem} />
-                        ))
-                    ) : (
-                        items.map((item, index) => (
-                            <Table key={index} onItemDelete={handleItemDelete} {...item.data()} />
-                        ))
-                    )}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4 md:p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+               
+                <div className="bg-white rounded-xl shadow-lg p-4 flex flex-wrap gap-4 justify-center">
+                    <button 
+                        onClick={fetchQueriedItems}
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                    >
+                        <Filter size={20} />
+                        Expiring Soon
+                    </button>
+                    <button 
+                        onClick={resetItems}
+                        className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                    >
+                        <RefreshCw size={20} />
+                        Reset View
+                    </button>
+                    <button 
+                        onClick={fetchCategories}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all transform hover:scale-105"
+                    >
+                        <ChefHat size={20} />
+                        Find Recipes
+                    </button>
                 </div>
-                <div className='flex justify-center items-center'>
-                    <button onClick={fetchQueriedItems} className='w-fit m-4 bg-blue-200 border border-black text-black'>Filter</button>
-                    <button onClick={resetItems} className='w-fit m-4 bg-blue-200 text-black'>Reset</button>
-                    <button onClick={fetchCategories} className='w-fit m-4 bg-blue-200 border border-black text-black'>Suggest</button>
-                </div>
-            </div>
-            <div className='bg-white'>
-                <h1 className='text-5xl text-center mt-16'>Recipes are here</h1>
-                <div className='flex flex-wrap space-x-8 space-y-5 justify-center'>
-                    {recipes.length > 0 ? (
-                        recipes.map(recipe => (
-                            <Recipe key={recipe.recipe.label} title={recipe.recipe.label} calories={recipe.recipe.calories} image={recipe.recipe.image} />
-                        ))
-                    ) : (
 
-                        <p className="text-center mt-4 text-2xl">Click "Suggest" to fetch recipes.</p>
+                {/* Inventory Section */}
+                <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                    <div className="flex items-center gap-3 border-b pb-4">
+                        <AlertCircle className="text-blue-600" size={24} />
+                        <h2 className="text-2xl font-semibold text-gray-800">Current Inventory</h2>
+                    </div>
+                    <div className="space-y-4">
+                        {queriedItems.length > 0
+                            ? queriedItems.map((queryItem, index) => (
+                                <Table key={index} onItemDelete={handleItemDelete} {...queryItem} />
+                            ))
+                            : items.map((item, index) => (
+                                <Table key={index} onItemDelete={handleItemDelete} {...item.data()} />
+                            ))}
+                    </div>
+                </div>
+
+                {/* Recipe Section */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="flex items-center gap-3 border-b pb-4 mb-6">
+                        <ChefHat className="text-green-600" size={24} />
+                        <h2 className="text-2xl font-semibold text-gray-800">Recommended Recipes</h2>
+                    </div>
+                    {recipes.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {recipes.map(recipe => (
+                                <Recipe 
+                                    key={recipe.id}
+                                    title={recipe.title}
+                                    image={recipe.image}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-600">
+                            <ChefHat size={48} className="mx-auto mb-4 text-gray-400" />
+                            <p>Click "Find Recipes" to get personalized recommendations based on your inventory</p>
+                        </div>
                     )}
                 </div>
             </div>

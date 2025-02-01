@@ -1,4 +1,4 @@
-body {
+.login-page {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +8,7 @@ body {
     background-color: #f0f2f5;
 }
 
-.login-container {
+.login-page .login-container {
     background-color: white;
     padding: 40px;
     border-radius: 8px;
@@ -18,12 +18,12 @@ body {
     text-align: center;
 }
 
-h2 {
+.login-page h2 {
     margin-bottom: 20px;
     color: #333;
 }
 
-#email {
+.login-page #email {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -31,7 +31,7 @@ h2 {
     border-radius: 4px;
 }
 
-#password {
+.login-page #password {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -39,7 +39,7 @@ h2 {
     border-radius: 4px;
 }
 
-button {
+.login-page button {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -50,20 +50,20 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.login-page button:hover {
     background-color: #0056b3;
 }
 
-.signup-option {
+.login-page .signup-option {
     margin-top: 20px;
 }
 
-.signup-option a {
+.login-page .signup-option a {
     color: #007bff;
     text-decoration: none;
 }
 
-.google-login {
+.login-page .google-login {
     margin-top: 20px;
     display: flex;
     justify-content: center;
@@ -76,22 +76,19 @@ button:hover {
     cursor: pointer;
 }
 
-.google-login img {
+.login-page .google-login img {
     width: 20px;
     margin-right: 10px;
 }
 
-/* Existing styles */
-
-.forgot-password {
+.login-page .forgot-password {
     margin-bottom: 10px;
     margin-left: -130px;
-    /* Adjust margin as needed */
     font-size: 11px;
     color: #007bff;
     cursor: pointer;
 }
 
-.forgot-password:hover {
+.login-page .forgot-password:hover {
     text-decoration: underline;
 }

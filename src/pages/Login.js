@@ -13,7 +13,6 @@ const Login = () => {
         e.preventDefault();
         try {
             const result = await firebase.signinUserWithEmailAndPassword(email, password);
-            // User will be automatically stored in localStorage through Firebase context
             console.log("Successful", result);
             console.log("Logged In");
         } catch (error) {
@@ -38,7 +37,7 @@ const Login = () => {
     }, [firebase, navigate])
 
     return (
-        <div className=' min-h-screen flex items-center justify-center bg-gradient-to-br from-green-300 to-blue-300 w-screen'>
+        <div className='login-page min-h-screen flex items-center justify-center bg-gradient-to-br from-green-300 to-blue-300 w-screen'>
             <div className="login-container ">
                 <h2 className='font-bold mb-3 text-lg'>Welcome Back</h2>
                 <form onSubmit={handleSubmit}>

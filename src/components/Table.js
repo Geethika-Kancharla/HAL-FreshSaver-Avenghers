@@ -1,80 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { Trash2, Calendar, Package, Hash } from 'lucide-react';
 import { useFirebase } from '../context/Firebase';
 
-const Table = (props) => {
-    const [url, setURL] = useState(null);
-    const [deleted, setDeleted] = useState(false);
+const Table = ({ pname, brand, quantity, expiry, id, onItemDelete }) => {
     const firebase = useFirebase();
 
-    // useEffect(() => {
-    //     firebase.getImageURL(props.imageURL).then(url => setURL(url));
-    // }, [props.imageURL, firebase, deleted]);
+    const handleDelete = async () => {
+        try {
+            await firebase.deleteItem(id);
+            onItemDelete(id);
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        }
+    };
 
-    const handleDelete = (id) => {
-        firebase.deleteItem(id)
-            .then(() => {
-                console.log('Document successfully deleted!');
-                setDeleted(prevState => !prevState);
-                props.onItemDelete(id);
-            })
-            .catch((error) => {
-                console.error('Error removing document: ', error);
-            });
+    const daysUntilExpiry = () => {
+        const today = new Date();
+        const expiryDate = new Date(expiry);
+        const diffTime = expiryDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    const getBadgeColor = (days) => {
+        if (days <= 7) return 'bg-red-100 text-red-800';
+        if (days <= 30) return 'bg-yellow-100 text-yellow-800';
+        return 'bg-green-100 text-green-800';
     };
 
     return (
-        <div className=" overflow-x-auto bg-white w-full flex justify-center space-x-28">
-            <table className=" text-sm text-left text-gray-500">
-                <thead className="text-xs uppercase bg-white text-gray-700">
-                    <tr>
-                        {/* <th scope="col" className="px-70 py-3 text-xl">
-                            <span className="sr-only">Image</span>
-                        </th> */}
-                        <th scope="col" className="px-6 py-3 text-xl">
-                            Product Name
-                        </th>
+        <div className="bg-white rounded-lg border border-gray-100 hover:border-blue-200 transition-all p-4 shadow-sm hover:shadow-md">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <div className="flex-1 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-800">{pname}</h3>
+                        <button
+                            onClick={handleDelete}
+                            className="text-red-500 hover:text-red-700 transition-colors"
+                            aria-label="Delete item"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    </div>
 
-                        <th scope="col" className="px-6 py-3 text-xl">
-                            Quantity
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-xl">
-                            Category
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-xl">
-                            Expiry Date
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-xl">
-                            Action
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
-                        {/* <td className="p-4">
-                            <img src={url} className="w-16 h-16 object-cover rounded-md shadow-md" alt="grocery" />
-                        </td> */}
-                        <td className="px-6 py-4 font-semibold text-gray-900 text-lg">
-                            {props.pname}
-                        </td>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center gap-2">
+                            <Package className="text-gray-400" size={16} />
+                            <div>
+                                <p className="text-xs text-gray-500">Brand</p>
+                                <p className="text-sm font-medium">{brand}</p>
+                            </div>
+                        </div>
 
-                        <td className="px-6 py-4 font-semibold text-gray-900 text-lg">
-                            {props.quantity}
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-gray-900 text-lg">
-                            {props.category}
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-gray-900 text-lg">
-                            {props.expiry}
-                        </td>
-                        <td className="px-6 py-4 space-x-4 flex">
-                            {/* <button className="font-medium text-white bg-green-500 hover:bg-green-600 py-1 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" >View</button> */}
-                            <button className="font-medium text-white bg-red-500 hover:bg-red-600 py-4 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" onClick={() => handleDelete(props.id)}>Remove</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        <div className="flex items-center gap-2">
+                            <Hash className="text-gray-400" size={16} />
+                            <div>
+                                <p className="text-xs text-gray-500">Quantity</p>
+                                <p className="text-sm font-medium">{quantity}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Calendar className="text-gray-400" size={16} />
+                            <div>
+                                <p className="text-xs text-gray-500">Expiry Date</p>
+                                <p className="text-sm font-medium">{expiry}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${getBadgeColor(daysUntilExpiry())}`}>
+                    {daysUntilExpiry()} days until expiry
+                </div>
+            </div>
         </div>
     );
-}
+};
 
-export default Table
+export default Table;
